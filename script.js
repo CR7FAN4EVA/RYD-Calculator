@@ -33,7 +33,7 @@ function inputDigit(d) {
 function setOperator(nextOp) {
 
     if (["+", "-", "*", "/"].includes(nextOp)) {
-        if(op && !overwrite) compute()
+        if (op && !overwrite) compute()
         prev = curr
         op = nextOp
         overwrite = true
@@ -44,33 +44,59 @@ function setOperator(nextOp) {
     }
 }
 
-function compute(){
+function compute() {
     if (prev === null || op === null) return
     const A = parseFloat(prev)
     const B = parseFloat(curr)
-    let result 
-    
-   switch (op){
-    case "+": result = A + B; break
-    case "-": result = A - B; break
-    case "*": result = A * B; break
-    case "/":
-        if (B === 0){
-            curr = "error"
-            updateDisplay(curr)
-            prev = null
-            op = null
-            overwrite = true
-            return
-        }
-        result = A / B; break
-   }
-   curr = (typeof result === "number") ? result.toString() : String(result)
-   updateDisplay(curr)
-   prev = null; op = null; overwrite = true
-   clearActiveOps() 
+    let result
+
+    switch (op) {
+        case "+": result = A + B; break
+        case "-": result = A - B; break
+        case "*": result = A * B; break
+        case "/":
+            if (B === 0) {
+                curr = "error"
+                updateDisplay(curr)
+                prev = null
+                op = null
+                overwrite = true
+                return
+            }
+            result = A / B; break
+    }
+    curr = (typeof result === "number") ? result.toString() : String(result)
+    updateDisplay(curr)
+    prev = null; op = null; overwrite = true
+    clearActiveOps()
 }
 
+function allClear() {
+    prev = null
+    curr = "0"
+    op = null
+    overwrite = true
+    clearActiveOps()
+    updateDisplay(curr)
+}
+
+function applyInvert() {
+    curr = curr.startsWith("-") ? curr.slice(1) : (curr === "0" ? "0" : "-" + curr);
+    updateDisplay(curr);
+
+}
+
+function format(n) {
+      const s = Number(n).toString();
+      if (s.includes("e")) return Number(n).toFixed(10); 
+      const fixed = Number(n).toFixed(10);
+      return parseFloat(fixed).toString();
+    }
+
+function applyPercent() {
+    curr = format(parseFloat(curr || "0") /100)
+    updateDisplay(curr)
+}
 
 form.addEventListener("click", (e) => {
     const t = e.target;
@@ -89,9 +115,23 @@ form.addEventListener("click", (e) => {
         console.log(`Operator set to ${value}`);
         return;
     }
-    if (type === "equals"){
+    if (type === "equals") {
         compute()
         return
+    }
+
+
+    if (type === "clear" && value === "clear") {
+        allClear();
+        return;
+    }
+    if (type === "operator" && value === "invert") {
+        applyInvert();
+        return;
+    }
+    if (type === "operator" && value === "percent") {
+        applyPercent();
+        return;
     }
 
 })
